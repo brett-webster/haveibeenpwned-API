@@ -15,6 +15,8 @@ import { fileURLToPath } from "url"; // NOTE: __dirname global is not available 
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import axios, { AxiosResponse } from "axios";
+import { BreachType, QueryParamType } from "../types";
 
 const PORT =
   process.env.npm_package_config_proxy_server_port ?? process.env.PORT ?? 3000; // defaults to 3000 if NO port is specified in EITHER package.json DEV script nor .env file (in that order)
@@ -41,33 +43,52 @@ if (process.env.NODE_ENV === "production") {
   );
   // statically serve everything in the dist folder on the route '/dist', if already built -- this includes a pre-built index.html & index-*.js (latter similar to bundle.js, in dist/assets folder)
   app.use(express.static(join(__dirname, "../dist"))); // 2 dots in order to go up one level to server folder level (i.e. root)
-  // serve index.html on the root path '/' + ALL other paths when in production mode (due to React Router client-side routing in a SPA -- client-side router takes over to display the correct view based on the route in the browser)
-  // catch-all route (*) replaces root path '/' here to always serve index.html -- when using React Router for client-side routing in a SPA, production mode requires the index.html file be served for ALL the routes on the server side (otherwise a 404 error results when trying to access a route directly in the browser)
-  app.get("*", (_req: Request, res: Response) => {
-    return res.status(200).sendFile(join(__dirname, "../dist/index.html"));
+  // serve index.html on the route '/'
+  app.get("/", (_req: Request, res: Response) => {
+    return res.status(200).sendFile(join(__dirname, "../dist/index.html")); // 2 dots in order to go up one level to server folder level (i.e. root)
   });
 }
 
 // --------
 
-// SAMPLE ENDPOINTS
+// DOCS:  https://haveibeenpwned.com/API/v3
+
+// Single endpoint --> '/breaches'
+// GET request --> returns all breaches for a given email address (provided as a query parameter) filtered by those possessing passwords or usernames (i.e. "DataClasses" property includes "Passwords" and/or "Usernames")
+app.get("/breaches", async (req: Request, res: Response) => {
+  try {
+    // Note:  Email address validated on the front-end
+    const { email } = req.query as QueryParamType; // destructure query param, using type assertion
+
+    const response: AxiosResponse<BreachType[]> = await axios.get(
+      `https://haveibeenpwned.com/api/v3/breachedaccount/${email}/?truncateResponse=false`,
+      {
+        headers: {
+          "hibp-api-key": process.env.HIBP_API_KEY,
+        },
+      }
+    );
+
+    // filter out breaches that don't contain passwords or usernames
+    const filteredBreaches: BreachType[] = response.data.filter(
+      (element: BreachType) =>
+        element.DataClasses.includes("Passwords") ||
+        element.DataClasses.includes("Usernames")
+    );
+
+    res.json(filteredBreaches);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error fetching posts:", error.message);
+    } else {
+      console.error("Error fetching posts:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+});
+
 app.get("/", (_req: Request, res: Response): Response => {
   return res.send("Hello, world!");
-});
-
-app.get("/api", (_req: Request, res: Response): Response => {
-  const onceTwice = {
-    once: "twice",
-  };
-  return res.status(200).json({ onceTwice });
-});
-
-app.post("/api", (req: Request, res: Response): Response => {
-  interface InputNumber {
-    inputNumber: number;
-  }
-  const apiResponseNumber: number = (req.body as InputNumber).inputNumber * 9;
-  return res.status(200).json({ apiResponseNumber });
 });
 
 // --------
