@@ -15,8 +15,9 @@ import { fileURLToPath } from "url"; // NOTE: __dirname global is not available 
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
-import axios, { AxiosResponse } from "axios";
 import { BreachType, QueryParamType } from "../types";
+import fetchAllBreaches from "./fetchAllBreaches.ts";
+import filterBreaches from "./filterBreaches.ts";
 
 const PORT =
   process.env.npm_package_config_proxy_server_port ?? process.env.PORT ?? 3000; // defaults to 3000 if NO port is specified in EITHER package.json DEV script nor .env file (in that order)
@@ -62,21 +63,13 @@ app.get("/api/breaches", async (req: Request, res: Response) => {
     // Note:  Email address validated on the front-end
     const { email } = req.query as QueryParamType; // destructure query param, using type assertion
 
-    const response: AxiosResponse<BreachType[]> = await axios.get(
-      `https://haveibeenpwned.com/api/v3/breachedaccount/${email}/?truncateResponse=false`,
-      {
-        headers: {
-          "hibp-api-key": process.env.HIBP_API_KEY,
-        },
-      }
-    );
+    // Validate email query parameter as string (to avoid undefined error below)
+    if (typeof email !== "string") {
+      return res.status(400).send("Invalid email parameter");
+    }
 
-    // filter out breaches that don't contain passwords or usernames
-    const filteredBreaches: BreachType[] = response.data.filter(
-      (element: BreachType) =>
-        element.DataClasses.includes("Passwords") ||
-        element.DataClasses.includes("Usernames")
-    );
+    const allBreaches: BreachType[] = await fetchAllBreaches(email); // fetch from external API
+    const filteredBreaches: BreachType[] = filterBreaches(allBreaches); // filter out breaches that don't contain passwords or usernames
 
     res.json(filteredBreaches);
   } catch (error: unknown) {
