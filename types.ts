@@ -2,9 +2,9 @@ export interface BreachType {
   Name: string;
   Title: string;
   Domain: string;
-  BreachDate: Date;
-  AddedDate: Date;
-  ModifiedDate: Date;
+  BreachDate: string;
+  AddedDate: string;
+  ModifiedDate: string;
   PwnCount: number;
   Description: string;
   LogoPath: string;

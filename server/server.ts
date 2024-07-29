@@ -55,7 +55,9 @@ if (process.env.NODE_ENV === "production") {
 
 // Single endpoint --> '/breaches'
 // GET request --> returns all breaches for a given email address (provided as a query parameter) filtered by those possessing passwords or usernames (i.e. "DataClasses" property includes "Passwords" and/or "Usernames")
-app.get("/breaches", async (req: Request, res: Response) => {
+// haveibeenpwned API returns following response if no breaches found: 'Error fetching posts: Request failed with status code 404'
+// NOTE: 'api/' is a proxy set up in vite.config.js to redirect API calls to the Express server
+app.get("/api/breaches", async (req: Request, res: Response) => {
   try {
     // Note:  Email address validated on the front-end
     const { email } = req.query as QueryParamType; // destructure query param, using type assertion
@@ -88,7 +90,7 @@ app.get("/breaches", async (req: Request, res: Response) => {
 });
 
 app.get("/", (_req: Request, res: Response): Response => {
-  return res.send("Hello, world!");
+  return res.send("This is the server root endpoint");
 });
 
 // --------

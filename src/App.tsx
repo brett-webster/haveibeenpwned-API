@@ -1,89 +1,112 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
 import axios from "axios";
+import "./App.css";
+import { BreachType } from "../types";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [inputEmail, setInputEmail] = useState<string>("");
+  const [apiResponseArray, setApiResponseArray] = useState<BreachType[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  // -------------------
-
-  // BELOW ADDED FOR API ENDPOINT REQUESTS
-  const [getRequestOnLoad, setGetRequestOnLoad] = useState<string>("");
-  const [inputNumber, setInputNumber] = useState<number>(0);
-  const [apiResponseNumber, setApiResponseNumber] = useState<number>(0);
-
-  interface ApiResponse {
-    onceTwice: {
-      once: string;
-    };
-  }
-
-  interface PostResponse {
-    apiResponseNumber: number;
-  }
-
-  // SAMPLE ENDPOINT REQUESTS
-  // on inital page load only --> GET request
-  const initialLoadOnly = async () => {
-    const getResponse: ApiResponse = (await axios.get<ApiResponse>("/api"))
-      ?.data;
-    setGetRequestOnLoad(getResponse.onceTwice.once);
+  // helper fxns
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
-  void initialLoadOnly(); // @typescript-eslint/no-floating-promises <-- ADDED 'void' to eliminate linting error: Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator
 
-  // on field input + button click --> POST request
-  const callEndpointOnClick = async () => {
-    const postResponse: PostResponse = (
-      await axios.post<PostResponse>("/api", { inputNumber })
-    )?.data;
-    setApiResponseNumber(postResponse.apiResponseNumber);
+  const resetFieldsAndTable = (): void => {
+    setInputEmail(""); // reset input field onSubmit
+    setApiResponseArray([]); // clear the old table data
+    setErrorMessage(""); // clear any previous error messages
+  };
+
+  // on field input + button click --> GET request
+  const callEndpointOnClick = async (): Promise<void> => {
+    if (!validateEmail(inputEmail)) {
+      setErrorMessage("Invalid email address. Please try again");
+      return; // early exit if invalid email
+    }
+
+    resetFieldsAndTable();
+
+    try {
+      const postResponse: BreachType[] = (
+        await axios.get<BreachType[]>(`/api/breaches?email=${inputEmail}`)
+      )?.data;
+      setApiResponseArray(postResponse);
+    } catch (error: unknown) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   const handleFieldValueChange = (
     event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setInputNumber(Number(event.target.value));
+  ): void => {
+    setInputEmail(event.target.value);
   };
 
   // -------------------
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>haveibeenpwned API</h1>
 
-      {/* BELOW ADDED FOR API ENDPOINT REQUESTS */}
+      <p className="input-prompt">
+        Enter a valid email address to see if it has been compromised in a data
+        breach:
+      </p>
       <br></br>
       <br></br>
-      <span>SIMPLE GET REQUEST WORKING FROM BACKEND: {getRequestOnLoad}</span>
+
+      <input value={inputEmail} onChange={handleFieldValueChange}></input>
       <br></br>
       <br></br>
-      <input value={inputNumber} onChange={handleFieldValueChange}></input>
-      <button onClick={() => void callEndpointOnClick()}>Click me</button>
+
+      <button onClick={() => void callEndpointOnClick()}>Submit</button>
+      <button onClick={() => void resetFieldsAndTable()}>Clear</button>
       <br></br>
-      <span>NUMBER INPUT: {inputNumber}</span>
       <br></br>
-      <span>NUMBER OUTPUT: {apiResponseNumber}</span>
+
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+
+      <div>
+        <br></br>
+        {apiResponseArray.length === 0 && !errorMessage ? (
+          <> No breaches found</>
+        ) : !errorMessage ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Domain</th>
+                <th>BreachDate</th>
+                <th>UserName</th>
+                <th>Password</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apiResponseArray.map((elem) => {
+                const userNameBreached: boolean =
+                  elem.DataClasses.includes("Usernames");
+                const passwordBreached: boolean =
+                  elem.DataClasses.includes("Passwords");
+
+                return (
+                  <tr key={elem.Name}>
+                    <td>{elem.Name}</td>
+                    <td>{elem.Domain}</td>
+                    <td>{elem.BreachDate}</td>
+                    <td>{userNameBreached ? "X" : ""}</td>
+                    <td>{passwordBreached ? "X" : ""}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          ""
+        )}
+      </div>
     </>
   );
 }
