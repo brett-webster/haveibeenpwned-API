@@ -2,11 +2,13 @@ import { useState } from "react";
 import axios from "axios";
 import "./App.css";
 import { BreachType } from "../types";
+import DataTable from "./DataTable";
 
 function App() {
   const [inputEmail, setInputEmail] = useState<string>("");
   const [apiResponseArray, setApiResponseArray] = useState<BreachType[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [noBreachesFound, setNoBreachesFound] = useState<boolean>(false);
 
   // helper fxns
   const validateEmail = (email: string): boolean => {
@@ -18,6 +20,7 @@ function App() {
     setInputEmail(""); // reset input field onSubmit
     setApiResponseArray([]); // clear the old table data
     setErrorMessage(""); // clear any previous error messages
+    setNoBreachesFound(false); // reset the "No breaches found" boolean (so message doesn't persist)
   };
 
   // on field input + button click --> GET request
@@ -33,7 +36,9 @@ function App() {
       const postResponse: BreachType[] = (
         await axios.get<BreachType[]>(`/api/breaches?email=${inputEmail}`)
       )?.data;
+
       setApiResponseArray(postResponse);
+      if (!postResponse.length) setNoBreachesFound(true); // set flag to true if no breaches found (to display message)
     } catch (error: unknown) {
       console.error("Error fetching data:", error);
     }
@@ -72,37 +77,9 @@ function App() {
       <div>
         <br></br>
         {apiResponseArray.length === 0 && !errorMessage ? (
-          <> No breaches found</>
+          <>{noBreachesFound && "No breaches found"}</>
         ) : !errorMessage ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Domain</th>
-                <th>BreachDate</th>
-                <th>UserName</th>
-                <th>Password</th>
-              </tr>
-            </thead>
-            <tbody>
-              {apiResponseArray.map((elem) => {
-                const userNameBreached: boolean =
-                  elem.DataClasses.includes("Usernames");
-                const passwordBreached: boolean =
-                  elem.DataClasses.includes("Passwords");
-
-                return (
-                  <tr key={elem.Name}>
-                    <td>{elem.Name}</td>
-                    <td>{elem.Domain}</td>
-                    <td>{elem.BreachDate}</td>
-                    <td>{userNameBreached ? "X" : ""}</td>
-                    <td>{passwordBreached ? "X" : ""}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <DataTable apiResponseArray={apiResponseArray} />
         ) : (
           ""
         )}

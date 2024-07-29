@@ -22,7 +22,21 @@ export interface QueryParamType {
   email?: string;
 }
 
-// EXAMPLE ---> https://haveibeenpwned.com/API/v3#BreachModel
+export interface DataRowType {
+  name: string;
+  domain: string;
+  breachDate: string;
+  userName: string;
+  password: string;
+}
+
+export interface ApiResponseArrayType {
+  apiResponseArray: BreachType[];
+}
+
+//   -----------
+
+// BreachType EXAMPLE ---> https://haveibeenpwned.com/API/v3#BreachModel
 // {
 // "Name": "Adobe",
 // "Title": "Adobe",

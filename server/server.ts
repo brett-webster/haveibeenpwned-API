@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === "production") {
 
 // Single endpoint --> '/breaches'
 // GET request --> returns all breaches for a given email address (provided as a query parameter) filtered by those possessing passwords or usernames (i.e. "DataClasses" property includes "Passwords" and/or "Usernames")
-// haveibeenpwned API returns following response if no breaches found: 'Error fetching posts: Request failed with status code 404'
+// haveibeenpwned API returns following response if no breaches found: 'Request failed with status code 404'
 // NOTE: 'api/' is a proxy set up in vite.config.js to redirect API calls to the Express server
 app.get("/api/breaches", async (req: Request, res: Response) => {
   try {
@@ -81,9 +81,10 @@ app.get("/api/breaches", async (req: Request, res: Response) => {
     res.json(filteredBreaches);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      console.error("Error fetching posts:", error.message);
+      console.error("Error fetching breaches:", error.message);
+      res.json([]); // return empty array if no breaches found -- indicated by 'Request failed with status code 404' response from haveibeenpwned API
     } else {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching breaches:", error);
       res.status(500).send("Internal Server Error");
     }
   }

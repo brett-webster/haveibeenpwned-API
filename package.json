@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-ts-swc-boilerplate-with-express-server",
+  "name": "restor3d-take-home-haveibeenpwned-api",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
+    "mui-datatables": "^4.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
+    "@types/mui-datatables": "^4.3.12",
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
