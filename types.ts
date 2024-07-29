@@ -30,9 +30,12 @@ export interface DataRowType {
   password: string;
 }
 
-export interface ApiResponseArrayType {
-  apiResponseArray: BreachType[];
+export interface ColumnMeta {
+  index: number;
+  label: string;
 }
+
+export type HandleToggleColumn = (index: number) => void;
 
 //   -----------
 

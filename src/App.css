@@ -8,3 +8,11 @@
 .input-prompt {
   color: #888;
 }
+
+.input-field {
+  padding: 0.5rem;
+  margin: 0.5rem;
+  width: 275px;
+  height: 30px;
+  font-size: 1rem;
+}

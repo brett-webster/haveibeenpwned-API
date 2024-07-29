@@ -6,6 +6,7 @@ import DataTable from "./DataTable";
 
 function App() {
   const [inputEmail, setInputEmail] = useState<string>("");
+  const [tableEmail, setTableEmail] = useState<string>("");
   const [apiResponseArray, setApiResponseArray] = useState<BreachType[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [noBreachesFound, setNoBreachesFound] = useState<boolean>(false);
@@ -17,6 +18,7 @@ function App() {
   };
 
   const resetFieldsAndTable = (): void => {
+    setTableEmail(inputEmail); // set table email to input email (for display in DataTable)
     setInputEmail(""); // reset input field onSubmit
     setApiResponseArray([]); // clear the old table data
     setErrorMessage(""); // clear any previous error messages
@@ -63,7 +65,11 @@ function App() {
       <br></br>
       <br></br>
 
-      <input value={inputEmail} onChange={handleFieldValueChange}></input>
+      <input
+        value={inputEmail}
+        onChange={handleFieldValueChange}
+        className="input-field"
+      ></input>
       <br></br>
       <br></br>
 
@@ -79,7 +85,10 @@ function App() {
         {apiResponseArray.length === 0 && !errorMessage ? (
           <>{noBreachesFound && "No breaches found"}</>
         ) : !errorMessage ? (
-          <DataTable apiResponseArray={apiResponseArray} />
+          <DataTable
+            apiResponseArray={apiResponseArray}
+            tableEmail={tableEmail}
+          />
         ) : (
           ""
         )}
