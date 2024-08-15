@@ -4,7 +4,7 @@
 
 ### Cloning Repo:
 
-Pull down shared ‘Restor3d-take-home’ repo into your local directory. Use Github’s fork function, then clone the repo by entering the below command into your CLI. Navigate to that directory
+Pull down shared ‘haveibeenpwned-API’ repo into your local directory. Use Github’s fork function, then clone the repo by entering the below command into your CLI. Navigate to that directory
 
 ```bash
 git clone [https-url] [new-folder-name]
@@ -14,7 +14,7 @@ cd [new-folder-name]
 NOTE:
 
 ```bash
-https-url = https://github.com/brett-webster/Restor3d-take-home.git
+https-url = https://github.com/brett-webster/haveibeenpwned-API.git
 ```
 
 ### Installing Node Packages:
@@ -89,13 +89,14 @@ The server exposes an endpoint (/api/breaches) in order to accept user requests 
 
 - Replace transmission of email address using query parameter via GET requests by a more secure method (such as body via a POST request)
 - Consider ways to improve load time (e.g. cache previously returned results, slim down payload returned from server to only data required by client, optimize use of external API)
+- Investigate additional ways to reduce bundle build size (rollup 'visualizer' & 'build' plug-ins added to vite.config.ts)
 - Further explore rate limiting on both this app & on the official haveibeenpwned API side
 - Add more granular error handling on the back-end
 - Add integration testing
 - Design:
   - No visual indicator of MUI DataTable column sort availability other than on hover; consider adding
   - Column header sorting arrows remain intact after subsequently sorting a different column (potentially confusing)
-  - Default sort on load is descending by 'Name'; defaulting instead to descending by 'Breach Data' may be more valuable to user
+  - Default sort on load is ascending by 'Name'; defaulting instead to descending by 'Breach Data' may be more valuable to user
   - Consider adding modal confirmation upon deleting a breach (or multiple breaches), an 'undo latest event' capability & a way to fully restore all deleted breaches to initial load
   - Expanding the table's rows per page to 15 or 100 sets the focus at far bottom of table/page; consider applying an auto-scroll back to top
   - Work with a professional designer :)

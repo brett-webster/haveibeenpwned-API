@@ -108,7 +108,7 @@ function DataTable({
         setCellProps: () => ({
           style: {
             textAlign: "center",
-            width: "120px",
+            width: "200px", // widen column width to ensure static table width across paginations
           },
         }),
       },

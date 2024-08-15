@@ -35,12 +35,12 @@ function App() {
     resetFieldsAndTable();
 
     try {
-      const postResponse: BreachType[] = (
+      const getResponse: BreachType[] = (
         await axios.get<BreachType[]>(`/api/breaches?email=${inputEmail}`)
       )?.data;
 
-      setApiResponseArray(postResponse);
-      if (!postResponse.length) setNoBreachesFound(true); // set flag to true if no breaches found (to display message)
+      setApiResponseArray(getResponse);
+      if (!getResponse.length) setNoBreachesFound(true); // set flag to true if no breaches found (to display message)
     } catch (error: unknown) {
       console.error("Error fetching data:", error);
     }
